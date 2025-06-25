@@ -59,22 +59,31 @@ export const CalendarProvider = ({ children }) => {
       setLoading(true);
       const calendarEvents = await getUpcomingEvents(10);
 
-      const eventsWithSummaries = await Promise.all(
-        calendarEvents.map(async (event) => {
-          const summary = await summarizeEvent(event);
-          return {
-            ...event,
-            aiSummary: summary,
-          };
-        })
-      );
+      const eventsWithEmptySummary = calendarEvents.map((event) => ({
+        ...event,
+        aiSummary: null, // No summary yet
+      }));
 
-      setEvents(eventsWithSummaries);
+      setEvents(eventsWithEmptySummary);
     } catch (error) {
       console.error("Failed to fetch events:", error);
-      throw error;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const summarizeSingleEvent = async (eventId) => {
+    const event = events.find((e) => e.id === eventId);
+    if (!event) return;
+
+    try {
+      const summary = await summarizeEvent(event);
+      const updatedEvents = events.map((e) =>
+        e.id === eventId ? { ...e, aiSummary: summary } : e
+      );
+      setEvents(updatedEvents);
+    } catch (error) {
+      console.error("Failed to summarize event:", error);
     }
   };
 
@@ -85,6 +94,7 @@ export const CalendarProvider = ({ children }) => {
     gapiInitialized,
     connectGoogleCalendar,
     fetchEvents,
+    summarizeSingleEvent, // ✅ Add this
   };
 
   return (
