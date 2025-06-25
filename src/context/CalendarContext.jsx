@@ -5,7 +5,7 @@ import {
   getUpcomingEvents,
   isGoogleSignedIn,
 } from "../lib/google";
-import { summarizeEvent } from "../lib/openai";
+import { summarizeEvent } from "../lib/openrouter";
 
 const CalendarContext = createContext({});
 
